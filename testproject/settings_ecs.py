@@ -15,3 +15,6 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', ''),
     }
 }
+
+# Allow hosts from env or default to all for ECS
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
