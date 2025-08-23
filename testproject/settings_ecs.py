@@ -47,7 +47,7 @@ from socket import gethostbyname, gethostname
 
 # Set your allowed hosts here
 ALLOWED_HOSTS = [
-    '*'
+    '*',
     'yourdomain.com',
     'anotherdomain.com',
 ]
