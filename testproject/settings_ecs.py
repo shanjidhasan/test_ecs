@@ -44,8 +44,8 @@ DATABASES = {
 
 _allowed_hosts_env = os.getenv('DJANGO_ALLOWED_HOSTS', '*')
 if _allowed_hosts_env.strip() == '*':
-    # Allow all hostnames and all IPv4 addresses
-    ALLOWED_HOSTS = ['*', re.compile(r'^\d{1,3}(?:\.\d{1,3}){3}$')]
+    # Allow all hostnames and all IPv4 addresses with optional port
+    ALLOWED_HOSTS = ['*', re.compile(r'^(\d{1,3}\.){3}\d{1,3}(:\d+)?$')]
 else:
     ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_env.split(',') if h.strip()]
 
