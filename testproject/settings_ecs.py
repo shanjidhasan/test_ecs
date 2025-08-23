@@ -40,16 +40,26 @@ DATABASES = {
     }
 }
 
-# Allow hosts from env or default to all for ECS
 
-_allowed_hosts_env = os.getenv('DJANGO_ALLOWED_HOSTS', '*')
-if _allowed_hosts_env.strip() == '*':
-    # Allow all hostnames and all IPv4 addresses with optional port
-    ALLOWED_HOSTS = ['*', re.compile(r'^(\d{1,3}\.){3}\d{1,3}(:\d+)?$')]
-else:
-    ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_env.split(',') if h.strip()]
+# Allow only hardcoded hosts and append container's private IP
+from socket import gethostbyname, gethostname
 
-logger.info(f"ALLOWED_HOSTS at startup: {ALLOWED_HOSTS}")
+# Set your allowed hosts here
+ALLOWED_HOSTS = [
+    'yourdomain.com',
+    'anotherdomain.com',
+]
+
+# Append the container's private IP address for ECS health checks
+try:
+    container_ip = gethostbyname(gethostname())
+    if container_ip not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(container_ip)
+    print(f"Appended container IP {container_ip} to ALLOWED_HOSTS.")
+except Exception as e:
+    print(f"Could not append container IP to ALLOWED_HOSTS: {e}")
+
+print(f"ALLOWED_HOSTS at startup: {ALLOWED_HOSTS}")
 
 # Patch Django's DisallowedHost exception to log the host being checked
 import django.core.exceptions
