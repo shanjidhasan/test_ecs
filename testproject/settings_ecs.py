@@ -17,4 +17,8 @@ DATABASES = {
 }
 
 # Allow hosts from env or default to all for ECS
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+_allowed_hosts_env = os.getenv('DJANGO_ALLOWED_HOSTS', '*')
+if _allowed_hosts_env.strip() == '*':
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_env.split(',') if h.strip()]
