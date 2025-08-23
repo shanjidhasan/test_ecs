@@ -1,8 +1,10 @@
 # Dockerfile for Django + Gunicorn
 FROM python:3.9-slim
 
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV DJANGO_SETTINGS_MODULE=testproject.settings_ecs
 
 WORKDIR /app
 
