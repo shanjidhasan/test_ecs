@@ -11,3 +11,6 @@ def test_json(request):
 	return JsonResponse({'message': 'This is a test JSON response.'})
 
 # Create your views here.
+
+def root(request):
+	return JsonResponse({"message": "Welcome to the root endpoint!"})
