@@ -1,8 +1,29 @@
+# Logging configuration to ensure allowed_hosts logger outputs to console
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.allowed_hosts': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
 # Django settings for ECS
 import os
 from pathlib import Path
 
 import logging
+import re
 logger = logging.getLogger('django.allowed_hosts')
 
 from .settings import *  # Import all default settings
@@ -20,9 +41,11 @@ DATABASES = {
 }
 
 # Allow hosts from env or default to all for ECS
+
 _allowed_hosts_env = os.getenv('DJANGO_ALLOWED_HOSTS', '*')
 if _allowed_hosts_env.strip() == '*':
-    ALLOWED_HOSTS = ['*']
+    # Allow all hostnames and all IPv4 addresses
+    ALLOWED_HOSTS = ['*', re.compile(r'^\d{1,3}(?:\.\d{1,3}){3}$')]
 else:
     ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts_env.split(',') if h.strip()]
 
