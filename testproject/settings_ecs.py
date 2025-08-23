@@ -44,20 +44,32 @@ DATABASES = {
 # Allow only hardcoded hosts and append container's private IP
 from socket import gethostbyname, gethostname
 
+
 # Set your allowed hosts here
 ALLOWED_HOSTS = [
+    '*'
     'yourdomain.com',
     'anotherdomain.com',
 ]
+
+print(f"Initial ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 # Append the container's private IP address for ECS health checks
 try:
     container_ip = gethostbyname(gethostname())
     if container_ip not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(container_ip)
-    print(f"Appended container IP {container_ip} to ALLOWED_HOSTS.")
+        print(f"Appended container IP {container_ip} to ALLOWED_HOSTS.")
+    else:
+        print(f"Container IP {container_ip} already in ALLOWED_HOSTS.")
 except Exception as e:
     print(f"Could not append container IP to ALLOWED_HOSTS: {e}")
+
+# If running in ECS or Gunicorn, also add the host IP from environment if available
+gunicorn_ip = os.environ.get('GUNICORN_IP')
+if gunicorn_ip and gunicorn_ip not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(gunicorn_ip)
+    print(f"Appended GUNICORN_IP {gunicorn_ip} to ALLOWED_HOSTS.")
 
 print(f"ALLOWED_HOSTS at startup: {ALLOWED_HOSTS}")
 
@@ -66,6 +78,7 @@ import django.core.exceptions
 _orig_disallowed_host = django.core.exceptions.DisallowedHost
 class LoggedDisallowedHost(_orig_disallowed_host):
     def __init__(self, msg, *args, **kwargs):
+        print(f"DisallowedHost check failed: {msg} | ALLOWED_HOSTS: {ALLOWED_HOSTS}")
         logger.error(f"DisallowedHost check failed: {msg} | ALLOWED_HOSTS: {ALLOWED_HOSTS}")
         super().__init__(msg, *args, **kwargs)
 django.core.exceptions.DisallowedHost = LoggedDisallowedHost
